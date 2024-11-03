@@ -1,0 +1,658 @@
+############################################Feature Transformation: Apply LDA Algorithm on Iris Dataset and classify which species a given flower belongs to.#####################################
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+data = pd.read_csv("Iris.csv")
+
+data.head()
+
+X = data.iloc[:,:-1] #Features
+y = data['Class Label'] #Target Variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+lda = LinearDiscriminantAnalysis()
+X_train_lda = lda.fit_transform(X_train_scaled, y_train)
+X_test_lda = lda.transform(X_test_scaled)
+
+classifier = LogisticRegression()
+classifier.fit(X_train_lda, y_train)
+y_pred = classifier.predict(X_test_lda)
+
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print("Accuracy : ", accuracy)
+print("Confusion Matrix : \n", conf_matrix)
+
+
+
+######################################Regression Analysis: Use the diabetes data set from UCI and Pima Indians Diabetes data set for performing the following:##################################
+
+
+import pandas as pd
+import numpy as np
+from scipy import stats
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression,LogisticRegression
+from sklearn.metrics import r2_score,accuracy_score
+import warnings
+warnings.filterwarnings("ignore")
+
+df = pd.read_csv("diabetes.csv")
+
+
+df
+
+info_df = df.describe()
+info_df
+
+df['Glucose'].var()
+
+var_df = info_df.loc[['std'],:]**2
+var_df.index = ['var']
+var_df
+
+info_df.append(var_df)
+
+df.info()
+
+data.skew()
+
+data.kurt()
+
+data.mode().iloc[0]
+
+X = data.drop('Outcome', axis = 1)
+y = data['Outcome']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+linear_regression = LinearRegression()
+linear_regression.fit(X_train,y_train)
+y_pred_linear = linear_regression.predict(X_test)
+r2_linear = r2_score(y_test,y_pred_linear)
+print(f"Linear Regression R-squared :", (r2_linear))
+
+
+logistic_reg = LogisticRegression()
+logistic_reg.fit(X_train,y_train)
+y_pred_logistic = logistic_reg.predict(X_test)
+accuracy = accuracy_score(y_test,y_pred_logistic)
+print(f"Logistic Regression Accuracy :",(accuracy))
+
+linear_regression.score(X_test,y_test)
+
+
+
+###Classification Analysis: Implement K-Nearest Neighbors’ algorithm on social network ad dataset. Compute confusion matrix, accuracy, error rate, precision and recall on the given dataset.#### 
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+data = pd.read_csv("Social_Network_Ads.csv")
+data.head()
+
+X = data.iloc[:, [2,3]]
+y = data['Purchased']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_Scaled = scaler.transform(X_test)
+
+k = 5
+knn_classifier = KNeighborsClassifier(n_neighbors=k)
+knn_classifier.fit(X_train_scaled, y_train)
+
+y_pred = knn_classifier.predict(X_test_Scaled)
+confusion_matrix(y_test, y_pred)
+
+accuracy = accuracy_score(y_test, y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+
+print("Accuracy:", accuracy*100, "%")
+print("Error Rate:", error_rate)
+print("Precision :", precision)
+print("Recall :", recall)
+
+
+##########Clustering Analysis: Implement K-Means clustering on Iris.csv dataset. Determine the number of clusters using the elbow method##################
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+data = pd.read_csv("Iris.csv")
+data.head()
+
+X = data.iloc[:, [1,2,3,4]]
+
+inertia = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, max_iter=300, random_state=42)
+    kmeans.fit(X)
+    inertia.append(kmeans.inertia_)
+
+plt.plot(range(1,11), inertia, marker='o')
+plt.xlabel('Number of Clusters')
+plt.ylabel('Inertia(Within-cluster sum of squares)')
+plt.title('Elbow Method')
+plt.show()
+
+optimal_k = 3
+kmeans = KMeans(n_clusters=optimal_k, init='k-means++', max_iter=300, n_init=10, random_state=0)
+y_kmeans = kmeans.fit_predict(X)
+y_kmeans
+
+###########Ensemble Learning: Implement Random Forest Classifier model to predict the safety of the car################################
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+import category_encoders as ce
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+data = pd.read_csv("car_evaluation.csv")
+data.head()
+
+data.describe()
+
+col_names = ['buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety', 'class']
+data.columns = col_names
+
+data.head()
+
+X = data.drop(['class'], axis=1)
+y = data['class']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train.shape, X_test.shape
+
+encoder = ce.OrdinalEncoder(cols=['buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety'])
+X_train = encoder.fit_transform(X_train)
+X_test = encoder.transform(X_test)
+
+rfc = RandomForestClassifier(random_state = 0)
+rfc.fit(X_train, y_train)
+
+y_pred = rfc.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print('Accuracy : ', accuracy,"\n")
+print("confusion matrix : \n", conf_matrix)
+
+
+
+###########Reinforcement Learning: Implement Reinforcement Learning using an example of a maze environment that the agent needs to explore.##########
+
+import numpy as np
+
+maze = np.array([
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 2]  # 2 is the goal
+])
+
+
+learning_rate = 0.1
+discount_factor = 0.9
+epsilon = 0.1
+num_episodes = 1000
+
+num_states, num_actions = maze.size, 4
+Q = np.zeros((num_states, num_actions))
+
+for _ in range(num_episodes):
+    state = 0  # Starting position
+
+    while True:
+        action = np.random.choice(num_actions) if np.random.uniform(0, 1) < epsilon else np.argmax(Q[state, :])
+        new_state = state + [0,1,2,3][action]  # Up, Down, Left, Right
+        reward = [-1, 1, 0][maze.flat[new_state]]
+        if reward: break
+        state = new_state
+
+
+current_state = 0
+while current_state != 16:  # Goal state
+    action = np.argmax(Q[current_state, :])
+    current_state = current_state + (action + 1)
+    print("Agent moved to state:", current_state)
+
+
+################# Analyzing Sales Data from Multiple #####################
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import os
+
+csv_data = pd.read_csv("sales data.csv")
+excel_data = pd.read_excel("Sales data.xlsx")
+json_data = pd.read_json("sales data.json")
+
+csv_data.head()
+
+excel_data.head()
+
+json_data.head()
+
+def merge(dataframes):
+    if dataframes:
+        return pd.concat(dataframes)
+
+df = merge([csv_data, excel_data, json_data])
+
+df.head()
+
+df.describe()
+
+df.info()
+
+df.Date = pd.to_datetime(df.Date)
+df.Time = pd.to_datetime(df.Time)
+
+df.dtypes
+
+df.isna().sum()
+
+df.duplicated().sum()
+
+df.boxplot()
+
+sns.pairplot(df)
+plt.show()
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Product line'], df['Total'], color='skyblue')
+plt.xlabel('Product Category')
+plt.ylabel('Total Sales Amount')
+plt.title('Total Sales by Product Category')
+plt.xticks(rotation = 20)
+plt.show()
+
+
+################## Analyzing Weather Data from OpenWeatherMap API. The goal is to interact with the OpenWeatherMap API ##############
+
+import requests
+import pandas as pd
+import json
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+API_key = '91dc4e027d565d766d090eec6efb196c'
+
+
+countries = ['Japan' , 'Saudi Arabia' , 'United States of America' , 'Indonesia' , 'India' , 'Egypt']
+
+country_name_list = []
+maxtemp = []
+mintemp = []
+humidity = []
+windspeed = []
+
+for country_names in countries:
+
+    # url = f'http://api.openweathermap.org/data/2.5/weather?q={country_names}&APPID={API_key}&units=metric'
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={country_names}&appid={API_key}&units=metric"
+
+    r = requests.get(url)
+        
+    data = r.json()
+        
+    formatted_json = json.dumps(data, sort_keys = True, indent = 4)
+    
+#     print(data)
+    country_name_list.append(data['name'])
+    maxtemp.append(data['main']['temp_max'])
+    mintemp.append(data['main']['temp_min'])
+    humidity.append(data['main']['humidity'])
+    windspeed.append(data['wind']['speed'])
+            
+
+df = pd.DataFrame()
+df['Names'] = country_name_list
+df['Max_Temp'] = maxtemp
+df['Min_Temp'] = mintemp
+df['Humidity'] = humidity
+df['WindSpeed'] = windspeed
+
+df.head()    
+
+df
+
+df.describe()
+
+df.info()
+
+df.isna().sum()
+
+df.duplicated().sum()
+
+average_temperature = df.groupby('Names')['Max_Temp'].mean()
+average_temperature
+
+average_temperature = df.groupby('Names')['Min_Temp'].mean()
+average_temperature
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['Max_Temp'], color = 'red')
+plt.title('Max. Temp. in Diff. coumtries')
+plt.xlabel('Countries')
+plt.ylabel('Temperature')
+plt.show()
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['Min_Temp'],color = 'lightblue')
+plt.title('Min. temp. in Diff. Countries')
+plt.xlabel('Countries')
+plt.ylabel('Temperature')
+plt.show()
+
+plt.figure(figsize=(10,6))
+plt.bar(df['Humidity'],df['Max_Temp'],color='lightgreen')
+plt.title('Relation btwn Humidity & Max. Temp.')
+plt.xlabel('Humidity')
+plt.ylabel('Max. Temperature')
+plt.show()
+
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['WindSpeed'],color='yellow')
+plt.title('Locationwise Winspeed Variation')
+plt.xlabel('Countries')
+plt.ylabel('Windspeed')
+plt.show()
+
+sns.pairplot(df)
+plt.show()
+
+corre = df[['Min_Temp','Humidity']].corr()
+sns.heatmap(corre, annot=True)
+plt.title("Temperature to Humidity relationship")
+plt.show()
+
+
+##################### Analyzing Customer Churn in a Telecommunications Company ##################
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+df = pd.read_csv("telecom_churn.csv")
+df.head()
+
+df.info()
+
+df.describe()
+
+df.shape
+
+df.isna().sum()
+
+df.dropna(inplace=True)
+
+df.duplicated().sum()
+
+df.drop_duplicates(inplace=True)
+
+df.columns
+
+df.drop(['customer_id', 'state', 'city', 'pincode', 'telecom_partner', 'date_of_registration'], inplace=True, axis=1)
+df.head()
+
+
+le = LabelEncoder()
+df['gender'] = le.fit_transform(df['gender'])
+
+df.head()
+
+plt.figure(figsize=(12,6))
+df.boxplot()
+plt.show()
+
+df.dtypes
+
+X = df.drop(columns=['churn'])
+y = df['churn']
+
+X_train, X_test, y_train, y_test, = train_test_split(X, y, test_size=0.2, random_state=42)
+
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+df.to_csv("Cleaned_Telecom_Customer_Churn.csv", index=False)
+
+
+############################# Data Wrangling on Real Estate Market The goal is to perform data wrangling to gain insights into the factors influencing housing prices ################
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+
+
+
+df = pd.read_csv("Real-Estate dataset.csv")
+df.head()
+
+df.isna().sum()
+
+df.info()
+
+df.describe()
+
+df.boxplot()
+
+Q1 = df['price'].quantile(0.25)
+Q3 = df['price'].quantile(0.75)
+iqr = Q3 - Q1 
+minm= Q1 - (1.5*iqr)
+maxm = Q3 + (1.5*iqr)
+df=df[(df['price']>minm) & (df['price']<maxm)]
+df.head()
+
+df.columns
+
+df.dtypes
+
+df.boxplot()
+plt.show()
+
+le = LabelEncoder()
+df['mainroad'] = le.fit_transform(df['mainroad'])
+df['guestroom'] = le.fit_transform(df['guestroom'])
+df['basement'] = le.fit_transform(df['basement'])
+df['hotwaterheating'] = le.fit_transform(df['hotwaterheating'])
+df['airconditioning'] = le.fit_transform(df['airconditioning'])
+df['furnishingstatus'] = le.fit_transform(df['furnishingstatus'])
+df['prefarea'] = le.fit_transform(df['prefarea'])
+
+df.head()
+
+plt.figure(figsize=(12, 8))
+sns.heatmap(data = df.corr(), cmap = "coolwarm", annot=True) 
+plt.show()
+
+
+
+########################## Analyzing Air Quality Index (AQI) Trends in a City. The goal is to use the matplotlib library to create visualizations ############
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+df = pd.read_csv("AQI Data Set.csv",  parse_dates=['Mounths'])
+df.head()
+
+df.columns
+
+column_names = ['Id', 'Months', 'PM10', 'SO2', 'NOx',
+       'PM25', 'NH3', 'O3','CO', ' Benzene', 'AQI']
+
+df.columns = column_names
+df.head()
+
+df.isna().sum()
+
+df.dropna(inplace=True)
+df.isna().sum()
+
+df.describe()
+
+
+df.info()
+
+plt.figure(figsize=(16, 6))
+plt.plot(df['Months'], df['AQI'])
+plt.xlabel('Date')
+plt.ylabel('AQI')
+plt.xticks(rotation=90)
+plt.title('Air Quality Index (AQI) Trend Over Time')
+plt.show()
+
+df.columns
+
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['PM10'], color='red')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('PM10')
+
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['PM25'], color='blue')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('PM2.5')
+
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['CO'], label='CO', color='orange')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('Carbon Monoxide Levels')
+
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['SO2'], label='SO2', color='violet')
+plt.xlabel('Date')
+plt.ylabel('SO2')
+plt.xticks(rotation=75)
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['NOx'], label='NOx', color='purple')
+plt.xlabel('Date')
+plt.ylabel('NOx')
+plt.xticks(rotation=75)
+plt.show()
+
+# Bar plots to compare AQI values across different dates or time periods
+plt.figure(figsize=(12, 6))
+plt.bar(df["Months"], df["AQI"], color="skyblue", label="AQI")
+plt.title("AQI Comparison Across Months")
+plt.xlabel("Months")
+plt.ylabel("AQI Value")
+plt.legend()
+plt.xticks(rotation=75)
+plt.show()
+
+#Box plots to analyze the distribution of AQI values for different pollutant categories
+plt.figure(figsize=(12, 6))
+df.boxplot(color='blue')
+plt.title("Distribution of AQI Values for Pollutants")
+plt.show()
+
+#Scatter plots to explore the relationship between AQI values and pollutant levels
+plt.figure(figsize=(12, 6))
+plt.scatter(df["AQI"], df["PM25"], c="red", label="PM2.5")
+plt.scatter(df["AQI"], df["SO2"], c="blue", label="SO2")
+plt.scatter(df["AQI"], df["O3"], c="green", label="O3")
+plt.title("Scatter Plot: AQI vs. Pollutant Levels")
+plt.xlabel("AQI Value")
+plt.ylabel("Pollutant Level")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+################ Analyzing Sales Performance by Region in a Retail Company. The goal is to perform data aggregation to analyze the sales performance ########################
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("retail_sales_data.csv")
+
+df["invoice_date"] = pd.to_datetime(df["invoice_date"])
+df.head()
+
+df.describe()
+
+df.info()
+
+df.isna().sum()
+
+df['Sales'] = df['quantity']*df['price']
+df.head()
+
+# Group data by region and calculate total sales amount
+region_sales = df.groupby("shopping_mall")["Sales"].sum()
+region_sales.plot(kind="bar")
+# region_sales.plot()
+plt.title("Sales Distribution by Region")
+plt.xlabel("Region")
+plt.ylabel("Total Sales Amount")
+plt.show()
+
+region_sales
+
+print(f"The top-performing region is: {region_sales.idxmax()}")
+
+#Stacked bar plot to compare sales amounts across regions and categories
+
+region_category_sales = df.groupby(["shopping_mall", "category"])["Sales"].sum().unstack()
+
+region_category_sales.plot(kind="bar", stacked=True)
+plt.title("Sales Comparison by Region and Product Category")
+plt.xlabel("Region")
+plt.ylabel("Total Sales Amount")
+plt.legend(title="Product Category")
+plt.show()
+
+
+temp = df.groupby(["shopping_mall", "payment_method"])["Sales"].sum().unstack()
+plt.figure(figsize=(10,10))
+temp.plot(kind='bar', stacked=True)
+plt.xlabel("Shopping mall")
+plt.ylabel("Sales")
+
+
+
