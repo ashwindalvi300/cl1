@@ -285,12 +285,12 @@ df.boxplot()
 sns.pairplot(df)
 plt.show()
 
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.bar(df['Product line'], df['Total'], color='skyblue')
 plt.xlabel('Product Category')
 plt.ylabel('Total Sales Amount')
 plt.title('Total Sales by Product Category')
-plt.xticks(rotation = 20)
+plt.xticks(rotation=20)
 plt.show()
 
 
